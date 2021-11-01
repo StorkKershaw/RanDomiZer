@@ -1,4 +1,4 @@
-# RanDomizer
+# RanDomiZer
 
 ## Project setup
 

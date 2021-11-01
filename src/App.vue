@@ -1,29 +1,44 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <b-container>
+      <b-row>
+        <randomizer-result />
+        <randomizer-setting />
+      </b-row>
+    </b-container>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+import { defineComponent, provide } from '@vue/composition-api'
 
-export default Vue.extend({
-  name: 'App',
+import RandomizerResult from '@/components/RandomizerResult.vue'
+import RandomizerSetting from '@/components/RandomizerSetting.vue'
+
+import { RANDOMIZER_KEY } from '@/stores/keys'
+import randomizerStore from '@/stores/randomizer'
+
+export default defineComponent({
   components: {
-    HelloWorld
+    RandomizerResult,
+    RandomizerSetting
+  },
+  setup () {
+    provide(RANDOMIZER_KEY, randomizerStore())
   }
 })
 </script>
 
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Avenir, Helvetica, "Yu Gothic Medium", "游ゴシック Medium",
+    YuGothic, "游ゴシック体", "ヒラギノ角ゴ Pro W3", sans-serif;
   -webkit-font-smoothing: antialiased;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 40px;
 }
 </style>
