@@ -18,7 +18,7 @@ export default function randomizerStore () {
 
   const increment = (index: number) => {
     const current = state.counts[index]
-    state.counts.splice(index, 1, currentSum.value < state.limit ? current + 1 : -1)
+    state.counts.splice(index, 1, current === -1 || currentSum.value < state.limit ? current + 1 : -1)
   }
 
   const decrement = (index: number) => {

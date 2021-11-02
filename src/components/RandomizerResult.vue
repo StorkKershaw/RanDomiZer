@@ -4,8 +4,10 @@
     md="6"
     @touchstart="increment()"
     @touchend="reset()"
+    @touchcancel="reset()"
     @mousedown="increment()"
     @mouseup="reset()"
+    @mouseleave="reset()"
   >
     <h4>サプライ</h4>
     <small>タップしてコピー / ロングタップしてシャッフル</small>
