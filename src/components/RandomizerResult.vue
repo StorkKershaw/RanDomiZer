@@ -12,7 +12,7 @@
     <h4>サプライ</h4>
     <small>タップしてコピー / ロングタップしてシャッフル</small>
 
-    <b-overlay show :opacity="overlay.opacity" @click="handleClick()">
+    <b-overlay show :opacity="overlay.opacity">
       <b-table-simple striped>
         <b-tbody>
           <b-tr
@@ -87,6 +87,9 @@ export default defineComponent({
         clearTimeout(interaction.timer)
         interaction.timer = null
       }
+      if (interaction.delay < 20 && interaction.current === 1) {
+        sendToClipboard()
+      }
       if (interaction.current === 100) {
         refresh()
       }
@@ -94,7 +97,7 @@ export default defineComponent({
       interaction.delay = 20
     }
 
-    const handleClick = async () => {
+    const sendToClipboard = async () => {
       navigator.clipboard.writeText(toText())
       root.$bvToast.toast('サプライをクリップボードにコピーしました。', {
         solid: true,
@@ -104,7 +107,7 @@ export default defineComponent({
       })
     }
 
-    return { state, interaction, overlay, increment, reset, handleClick }
+    return { state, interaction, overlay, increment, reset }
   }
 })
 </script>
