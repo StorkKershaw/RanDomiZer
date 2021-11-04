@@ -2,12 +2,14 @@
   <b-col
     class="randomizer-result"
     md="6"
-    @touchstart="increment()"
-    @touchend="reset()"
-    @touchcancel="reset()"
-    @mousedown="increment()"
-    @mouseup="reset()"
-    @mouseleave="reset()"
+    @touchstart="countUp"
+    @touchmove="observeMove"
+    @touchend="reset"
+    @touchcancel="reset"
+    @mousedown="countUp"
+    @mousemove="observeMove"
+    @mouseup="reset"
+    @mouseleave="reset"
   >
     <h4>サプライ</h4>
     <small>タップしてコピー / ロングタップしてシャッフル</small>
@@ -46,7 +48,10 @@
 import { computed, defineComponent, inject, reactive } from '@vue/composition-api'
 
 import { RANDOMIZER_KEY } from '@/stores/keys'
+import { hypotenuse } from '@/utils/hypotenuse'
 import { panic } from '@/utils/panic'
+import { positionFromEvent } from '@/utils/position-from-event'
+import { throttle } from '@/utils/throttle'
 
 export default defineComponent({
   setup (props, { root }) {
@@ -56,6 +61,9 @@ export default defineComponent({
     const interaction = reactive({
       current: 1,
       delay: 20,
+      startPosition: { x: NaN, y: NaN },
+      moveDistance: 0,
+      moveLimit: 0,
       timer: null as ReturnType<typeof setTimeout> | null
     })
 
@@ -68,7 +76,32 @@ export default defineComponent({
       }
     })
 
-    const increment = () => {
+    const setMoveLimit = (eventType: string) => {
+      switch (eventType) {
+        case 'touchstart': {
+          interaction.moveLimit = 10
+          break
+        }
+        case 'mousedown': {
+          interaction.moveLimit = 50
+          break
+        }
+        default: {
+          interaction.moveLimit = 0
+          break
+        }
+      }
+    }
+
+    const countUp = (event: TouchEvent | MouseEvent) => {
+      const position = positionFromEvent(event)
+      if (position == null) {
+        return
+      }
+      interaction.startPosition = position
+      interaction.moveDistance = 0
+      setMoveLimit(event.type)
+
       interaction.timer = setInterval(() => {
         if (interaction.delay > 0) {
           interaction.delay--
@@ -82,12 +115,21 @@ export default defineComponent({
       }, 20)
     }
 
+    const observeMove = (event: TouchEvent | MouseEvent) => {
+      const position = positionFromEvent(event)
+      if (position == null) {
+        return
+      }
+      const distance = hypotenuse(interaction.startPosition, position)
+      interaction.moveDistance = Math.max(interaction.moveDistance, distance)
+    }
+
     const reset = () => {
       if (interaction.timer !== null) {
         clearTimeout(interaction.timer)
         interaction.timer = null
       }
-      if (interaction.delay < 20 && interaction.current === 1) {
+      if (interaction.delay < 20 && interaction.current === 1 && interaction.moveDistance < interaction.moveLimit) {
         sendToClipboard()
       }
       if (interaction.current === 100) {
@@ -107,7 +149,14 @@ export default defineComponent({
       })
     }
 
-    return { state, interaction, overlay, increment, reset }
+    return {
+      state,
+      interaction,
+      overlay,
+      countUp,
+      observeMove: throttle(50, observeMove),
+      reset
+    }
   }
 })
 </script>
